@@ -64,13 +64,13 @@ export default function ActivePolls() {
         (payload) => {
           if (payload.new) {
             setPolls((current) => {
-              const exists = current.find((poll) => poll.id === payload.new.id);
+              const exists = current.find((poll) => poll.id === (payload.new as Poll).id);
               if (exists) {
                 return current.map((poll) =>
-                  poll.id === payload.new.id ? payload.new : poll
+                  poll.id === (payload.new as Poll).id ? (payload.new as Poll) : poll
                 );
               }
-              return [payload.new, ...current];
+              return [(payload.new as Poll), ...current];
             });
           }
         }

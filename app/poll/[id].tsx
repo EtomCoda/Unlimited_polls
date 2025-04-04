@@ -34,7 +34,7 @@ export default function PollScreen() {
           if (payload.new) {
             setOptions(current => 
               current.map(option =>
-                option.id === payload.new.id ? payload.new : option
+                option.id === (payload.new as PollOption).id ? (payload.new as PollOption) : option
               )
             );
           }
@@ -112,8 +112,8 @@ export default function PollScreen() {
       });
 
       Alert.alert('Success', 'Your vote has been recorded');
-      router.push('../(tabs)/index');
-    } catch (err) {
+      router.replace('/');
+    } catch (err:any) {
       Alert.alert('Error', 'Failed to submit vote. Please try again.');
       console.log(`Error submitting vote:`, err.message);
     } finally {
