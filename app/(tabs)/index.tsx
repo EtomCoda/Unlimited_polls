@@ -12,13 +12,21 @@ import { supabase } from '@/lib/supabase';
 import { Poll } from '@/types/database';
 import { PollCard } from '@/components/PollCard';
 import { ErrorView } from '@/components/ErrorView';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ActivePolls() {
+  const { session, isLoading } = useAuth();
   const router = useRouter();
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !session) {
+      router.replace('/auth/signin');
+    }
+  }, [isLoading, session]);
 
   const fetchPolls = async () => {
     try {
@@ -50,13 +58,15 @@ export default function ActivePolls() {
     // Subscribe to real-time updates
     const subscription = supabase
       .channel('polls')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'polls' }, 
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'polls' },
         (payload) => {
           if (payload.new) {
-            setPolls(current => {
-              const exists = current.find(poll => poll.id === payload.new.id);
+            setPolls((current) => {
+              const exists = current.find((poll) => poll.id === payload.new.id);
               if (exists) {
-                return current.map(poll => 
+                return current.map((poll) =>
                   poll.id === payload.new.id ? payload.new : poll
                 );
               }
@@ -72,7 +82,7 @@ export default function ActivePolls() {
     };
   }, []);
 
-  if (loading) {
+  if (isLoading || !session || loading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#0891b2" />

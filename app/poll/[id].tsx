@@ -7,12 +7,11 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Poll, PollOption, Vote } from '@/types/database';
 import { ErrorView } from '@/components/ErrorView';
 import { formatDistanceToNow } from 'date-fns';
-
 export default function PollScreen() {
   const { id } = useLocalSearchParams();
   const [poll, setPoll] = useState<Poll | null>(null);
@@ -54,7 +53,10 @@ export default function PollScreen() {
         supabase.from('polls').select('*').eq('id', id).single(),
         supabase.from('poll_options').select('*').eq('poll_id', id),
         supabase.auth.getUser().then(({ data: { user } }) => {
-          if (!user) return null;
+          if (!user) {
+            Alert.alert('Error', 'You must be logged in to view your vote.');
+            return;
+          };
           return supabase
             .from('votes')
             .select('*')
@@ -110,8 +112,10 @@ export default function PollScreen() {
       });
 
       Alert.alert('Success', 'Your vote has been recorded');
+      router.push('../(tabs)/index');
     } catch (err) {
       Alert.alert('Error', 'Failed to submit vote. Please try again.');
+      console.log(`Error submitting vote:`, err.message);
     } finally {
       setSubmitting(false);
     }

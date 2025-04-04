@@ -64,6 +64,7 @@ export default function CreatePoll() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         Alert.alert('Error', 'You must be logged in to create a poll');
+        router.push('/auth/signin');
         return;
       }
 
@@ -225,8 +226,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   durationInput: {
+    
     width: 80,
     textAlign: 'center',
+    marginTop: 8,
   },
   optionContainer: {
     flexDirection: 'row',
